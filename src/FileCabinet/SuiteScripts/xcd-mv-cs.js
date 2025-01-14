@@ -18,5 +18,10 @@ Website       : www.cloudio.com
 
 define(['N/currentRecord'], main);
 
-function main (currentRecord) {   
+function main(currentRecord) {
+    var currentRecord = currentRecord.get();
+    return { pageInit: pageInit }
+}
+
+function pageInit(){
 }
