@@ -15,15 +15,16 @@ Changing      : 1.0.0 - Initial release
 Website       : www.cloudio.com
 */
 
-var serverWidget, record;
+var serverWidget, record, file;
 
-var modules = ["N/ui/serverWidget", "N/record"];
+var modules = ["N/ui/serverWidget", "N/record", "N/file"];
 
 define(modules, main);
 
-function main(serverWidgetModule, recordModule) {
+function main(serverWidgetModule, recordModule, fileModule) {
     serverWidget = serverWidgetModule;
     record = recordModule;
+    file = fileModule;
     return { onRequest: onRequest };
 }
 
@@ -56,6 +57,7 @@ function onRequest(context) {
 
         //  U I   E L E M E N T S
         // BUTTONS
+
         form.addButton({ id: 'custpage_btn_crash', label: 'Crash', functionName: 'crashingCar()' });
         form.addButton({ id: 'custpage_btn_plate', label: 'Plate' });
         form.addButton({ id: 'custpage_btn_drift', label: 'Drift' });
@@ -128,6 +130,49 @@ function onRequest(context) {
             label: 'Note: This is still under development so, use carfully and report bugs to Mosses if you find any (mosasross@gmail.com).',
             type: serverWidget.FieldType.HELP
         });
+        var inlineHtml = form.addField({
+            id: 'custpage_chart',
+            type: serverWidget.FieldType.INLINEHTML,
+            label: 'Car Stunt Chart'
+        });
+        // HTML
+        // var chartJsFile = file.load({
+        //     id: '26762' 
+        // });
+        // var chartJsContent = chartJsFile.text;
+        inlineHtml.defaultValue = '<html>' +
+        '<head>' +
+        '<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>' + 
+        '</head>' +
+        '<body>' +
+        '<h1>Crash Cash Leaderboard</h1>' +
+        '<canvas id="crashCashChart" width="400" height="400"></canvas>' +
+        '<script>' +
+        'document.addEventListener("DOMContentLoaded", function() {' +
+        'var ctx = document.getElementById("crashCashChart").getContext("2d");' +
+        'new Chart(ctx, {' +
+        'type: "bar",' +
+        'data: {' +
+        'labels: ["Player 1", "Player 2", "Player 3"],' +
+        'datasets: [{' +
+        'label: "Crash Cash",' +
+        'data: [5000, 3000, 7000],' +
+        'backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"]' +
+        '}]' +
+        '},' +
+        'options: {' +
+        'scales: {' +
+        'y: { beginAtZero: true }' +
+        '}' +
+        '}' +
+        '});' +
+        '});' +
+        '</script>' +
+        '</body>' +
+        '</html>';
+    
+
+        log.debug('inline HTML', inlineHtml.defaultValue);
 
         // DISPLAY TYPES
         function setFieldsDisplayType(fields, displayType) {
@@ -135,15 +180,21 @@ function onRequest(context) {
                 field.updateDisplayType({ displayType: displayType });
             });
         }
-        var disablableFields = [gameCountFld, playerNameFld, crashCashFld, remainingCarsFld,
+        var disablableFields = [gameCountFld, playerNameFld, /*crashCashFld*/ remainingCarsFld,
             totalGamesPlayedFld, tornamentsPlayedFld, remainingPlayersCountFld,
             remainingPlayersFld, totalRemainingCarsFld];
         setFieldsDisplayType(disablableFields, serverWidget.FieldDisplayType.INLINE);
         importentNoteFld.updateLayoutType({
             layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE
-            
+
         })
         // B A C K E N D
+        if (typeof chartJsContent !== 'undefined') {
+            log.debug("Chart.js is loaded!");
+        } else {
+            log.debug("Chart.js is not loaded.");
+        }
+
         // Getting data from the Record
         totalRemainingCarsFld.defaultValue = playersCars;
         remainingPlayersFld.defaultValue = playerName;
@@ -151,16 +202,26 @@ function onRequest(context) {
         crashCashFld.defaultValue = playerCC;
         // remainingPlayersCountFld.defaultValue = remainingPlayersFld.length();
         totalGamesPlayedFld.defaultValue = gamesPlayed;
-        tornamentsPlayedFld = noOfTournamentsPlayed;
+        tornamentsPlayedFld.defaultValue = noOfTournamentsPlayed;
 
-
-        // Putting data back in the Server
 
         form.clientScriptModulePath = './xcd-mv-cs.js';
         form.addSubmitButton();
         context.response.writePage(form);
     }
     else if (context.request.method === 'POST') {
+        //  B A C K E N D
+        // Loading Record
+        var playersNameRecord = record.load({
+            type: 'customrecord_xcd_players',
+            id: 1
+        });
+        // Updating Record (From Field Values to record)
+        playersNameRecord.setValue({
+            fieldId: 'custrecord_xcd_crash_cash',
+            value: context.request.parameters.custpage_fld_crash_cash
+        });
 
+        playersNameRecord.save();
     }
 }
