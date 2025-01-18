@@ -39,7 +39,7 @@ function onRequest(context) {
         // Records Manipulation
         try {
             var playersNameRecord = record.load({
-                type: 'customrecord_xcd_players',
+                type: 'customrecord_xcd_player',
                 id: 1
             });
         } catch (error) {
@@ -170,7 +170,6 @@ function onRequest(context) {
         '</script>' +
         '</body>' +
         '</html>';
-    
 
         log.debug('inline HTML', inlineHtml.defaultValue);
 
@@ -183,17 +182,14 @@ function onRequest(context) {
         var disablableFields = [gameCountFld, playerNameFld, /*crashCashFld*/ remainingCarsFld,
             totalGamesPlayedFld, tornamentsPlayedFld, remainingPlayersCountFld,
             remainingPlayersFld, totalRemainingCarsFld];
+
         setFieldsDisplayType(disablableFields, serverWidget.FieldDisplayType.INLINE);
+
         importentNoteFld.updateLayoutType({
             layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE
 
         })
         // B A C K E N D
-        if (typeof chartJsContent !== 'undefined') {
-            log.debug("Chart.js is loaded!");
-        } else {
-            log.debug("Chart.js is not loaded.");
-        }
 
         // Getting data from the Record
         totalRemainingCarsFld.defaultValue = playersCars;
@@ -204,16 +200,21 @@ function onRequest(context) {
         totalGamesPlayedFld.defaultValue = gamesPlayed;
         tornamentsPlayedFld.defaultValue = noOfTournamentsPlayed;
 
+        remainingPlayersFld.defaultValue = context.request.parameters.selectedPlayers;
+
 
         form.clientScriptModulePath = './xcd-mv-cs.js';
         form.addSubmitButton();
         context.response.writePage(form);
     }
     else if (context.request.method === 'POST') {
+        var form = serverWidget.createForm({
+            title: 'Game Saved Successfully'
+        });
         //  B A C K E N D
         // Loading Record
         var playersNameRecord = record.load({
-            type: 'customrecord_xcd_players',
+            type: 'customrecord_xcd_player',
             id: 1
         });
         // Updating Record (From Field Values to record)
@@ -223,5 +224,13 @@ function onRequest(context) {
         });
 
         playersNameRecord.save();
+
+        form.addField({
+            id: 'custpage_success_message',
+            type: serverWidget.FieldType.INLINEHTML,
+            label: ' '
+        }).defaultValue = '<br><a href="/app/center/card.nl?sc=-29&whence=" style = "text-decoration: none;">Go Home</a>';
+    
+        context.response.writePage(form);
     }
 }
