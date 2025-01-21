@@ -22,11 +22,12 @@ function onRequest(context) {
         title: 'Load Lodash',
     });
     var testArry = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    var testArrySum = _.sum (testArry, 2);
+    var testArrySum = _.sum (testArry);
+    var testArrychunk = _.chunk(testArry, 2);
     form.addField({
         id: 'custpage_message',
         type: serverWidget.FieldType.INLINEHTML,
         label: 'Message',
-    }).defaultValue = 'Sum of ' + testArry + ' is ' + testArrySum;
+    }).defaultValue = 'Sum of ' + testArry + ' is ' + testArrySum + ' and chucked is ' + testArrychunk;
     context.response.writePage(form);
 }

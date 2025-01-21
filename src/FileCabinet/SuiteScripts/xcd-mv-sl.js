@@ -58,27 +58,29 @@ function onRequest(context) {
         //  U I   E L E M E N T S
         // BUTTONS
         form.addButton({ id: 'custpage_btn_crash', label: 'Crash', functionName: 'crashingCar()' });
-        form.addButton({ id: 'custpage_btn_plate', label: 'Plate' });
-        form.addButton({ id: 'custpage_btn_drift', label: 'Drift' });
+        form.addButton({ id: 'custpage_btn_plate', label: 'Plate', functionName: 'platingCar()' });
+        form.addButton({ id: 'custpage_btn_drift', label: 'Drift', functionName: 'driftingCar()' });
 
         // FIELD GROUPS
         form.addFieldGroup({ id: 'custpage_grp_current_game', label: "Current Game" });
-        form.addFieldGroup({ id: 'custpage_grp_remainings', label: "Remainings" });
         form.addFieldGroup({ id: 'custpage_grp_current_player_info', label: "Player Info" });
-
+        form.addFieldGroup({ id: 'custpage_grp_remainings', label: "Remainings" });
+        form.addFieldGroup({ id: 'custpage_grp_others', label: "Others" });
+      
         // FIELDS
         // Current Game
-        var gameCountFld = form.addField({
-            id: 'custpage_fld_game_count',
-            label: 'Game Count',
-            type: serverWidget.FieldType.INTEGER,
-            container: 'custpage_grp_current_game'
-        });
 
         var playerNameFld = form.addField({
             id: 'custpage_fld_player_name',
             label: 'Player Name',
             type: serverWidget.FieldType.TEXT,
+            container: 'custpage_grp_current_game'
+        });
+
+        var remainingCarsFld = form.addField({
+            id: 'custpage_fld_remaining_cars_name',
+            label: 'Remaining Cars',
+            type: serverWidget.FieldType.TEXTAREA,
             container: 'custpage_grp_current_game'
         });
 
@@ -89,11 +91,16 @@ function onRequest(context) {
             container: 'custpage_grp_current_game'
         });
 
-        var remainingCarsFld = form.addField({
-            id: 'custpage_fld_remaining_cars_name',
-            label: 'Remaining Cars',
-            type: serverWidget.FieldType.TEXTAREA,
-            container: 'custpage_grp_current_game'
+        
+        // remainingCarsFld.updateLayoutType({
+        //     layoutType: serverWidget.FieldLayoutType.OUTSIDEBELOW});
+        // remainingCarsFld.updateDisplaySize({
+        //     height:2,
+        //     width:92
+        // })
+        crashCashFld.updateBreakType({
+            breakType : serverWidget.FieldBreakType.STARTCOL,
+
         });
 
         // Player Info
@@ -111,27 +118,49 @@ function onRequest(context) {
             container: 'custpage_grp_current_player_info'
         });
 
-        // Remainings
-        var remainingPlayersCountFld = form.addField({
-            id: 'custpage_fld_nof_remaining_players',
-            label: 'Remaining Players Count',
-            type: serverWidget.FieldType.INTEGER,
-            container: 'custpage_grp_remainings'
+        var carsOwnedFld = form.addField({
+            id: 'custpage_fld_cars_owned',
+            label: 'Cars Owned',
+            type: serverWidget.FieldType.TEXTAREA,
+            container: 'custpage_grp_current_player_info'
         });
 
-        var remainingPlayersFld = form.addField({
-            id: 'custpage_fld_remaining_players_name',
-            label: 'Remaining Players Name',
-            type: serverWidget.FieldType.TEXT,
-            container: 'custpage_grp_remainings'
-        });
+        // Remainings
 
         var totalRemainingCarsFld = form.addField({
             id: 'custpage_fld_total_remaining_cars_name',
             label: 'Remaining Cars Name',
             type: serverWidget.FieldType.TEXTAREA,
             container: 'custpage_grp_remainings'
+        }).updateDisplaySize({
+            height: 5,
+            width: 55
         });
+
+        var remainingPlayersCountFld = form.addField({
+            id: 'custpage_fld_nof_remaining_players',
+            label: 'Remaining Players Count',
+            type: serverWidget.FieldType.INTEGER,
+            container: 'custpage_grp_remainings'
+        })
+
+        var remainingPlayersFld = form.addField({
+            id: 'custpage_fld_remaining_players_name',
+            label: 'Remaining Players Name',
+            type: serverWidget.FieldType.TEXTAREA,
+            container: 'custpage_grp_remainings'
+        }).updateDisplaySize({
+            height: 8.5,
+            width: 55
+        });
+
+        remainingPlayersFld.updateBreakType({
+            breakType : serverWidget.FieldBreakType.STARTCOL,
+
+        });
+
+       
+       
 
         var importentNoteFld = form.addField({
             id: 'custpage_fld_importent_note',
@@ -144,6 +173,14 @@ function onRequest(context) {
             type: serverWidget.FieldType.INLINEHTML,
             label: 'Car Stunt Chart'
         });
+        // Others
+        var gameCountFld = form.addField({
+            id: 'custpage_fld_game_count',
+            label: 'Game Count',
+            type: serverWidget.FieldType.INTEGER,
+            container: 'custpage_grp_others'
+        });
+      
 
         inlineHtml.defaultValue = '<html>' +
             '<head>' +
@@ -186,16 +223,25 @@ function onRequest(context) {
         }
 
         // var disablableFields = [
-        //     gameCountFld, playerNameFld, crashCashFld, remainingCarsFld,
+        //     gameCountFld, playerNameFld, /*crashCashFld*/ remainingCarsFld,
         //     totalGamesPlayedFld, tornamentsPlayedFld, remainingPlayersCountFld,
         //     remainingPlayersFld, totalRemainingCarsFld
         // ];
 
-        setFieldsDisplayType(disablableFields, serverWidget.FieldDisplayType.INLINE);
+        // setFieldsDisplayType(disablableFields, serverWidget.FieldDisplayType.INLINE);
 
         importentNoteFld.updateLayoutType({
             layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE
         });
+
+       
+        // tornamentsPlayedFld.updateBreakType({
+        //     breakType: serverWidget.FieldBreakType.STARTCOL
+        // });
+
+        // carsOwnedFld.updateBreakType({
+        //     breakType: serverWidget.FieldBreakType.STARTROW
+        // });
 
         // B A C K E N D
         // Getting data from the Record
