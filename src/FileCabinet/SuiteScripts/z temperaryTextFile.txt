@@ -1,0 +1,48 @@
+function crashingCar() {
+    try {
+        var curRecord = currentRecord.get();
+        var currentPlayingCar = carsOwned.shift();
+        var crashCCReward = crashCash += 400;
+        if (playersNameArray.length === 0) {
+            playersNameArray = playersNameArray.concat(tempCurrentPlayersNameArray);
+        };
+        if (carsOwned.length === 0) {
+            playerName = playersNameArray.shift();
+            tempCurrentPlayersNameArray.push(playerName);
+            carsOwned = carData[playerName];
+        }
+
+        curRecord.setValue({
+            fieldId: 'custpage_fld_crash_cash',
+            value: crashCCReward
+        });
+        curRecord.setValue({
+            fieldId: 'custpage_fld_remaining_cars_name',
+            value: carsOwned.join(', ')
+        });
+        curRecord.setValue({
+            fieldId: 'custpage_fld_player_name',
+            value: playerName
+        });
+
+        if (carsOwned.length === 0) {
+            alert('Next Player is loaded, since the last car is crashed');
+            var tempPlayerName = playersNameArray.shift();
+            tempCurrentPlayersNameArray.push(tempPlayerName);
+            carsOwned = carsOwned.concat(crashedCars);
+            crashedCars = [];
+            return;
+        }
+
+        curRecord.setValue({
+            fieldId: 'custpage_fld_current_playing_car',
+            value: currentPlayingCar
+        });
+        // playerRecord.setValue({
+        //     fieldId: 'custrecord_xcd_crash_cash',
+        //     value: crashCCReward
+        // })
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+}

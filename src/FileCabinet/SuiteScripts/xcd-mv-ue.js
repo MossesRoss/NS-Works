@@ -22,6 +22,7 @@ function afterSubmit(context) {
         });
 
         var selectedPlayers = CurrentRecord.getText({ fieldId: 'custrecord_xcd_selected_players' });
+        var playersCode = CurrentRecord.getValue({ fieldId: 'custrecord_xcd_players_code' });
 
         if (Array.isArray(selectedPlayers)) {
             selectedPlayers = selectedPlayers.join(',');
@@ -33,11 +34,12 @@ function afterSubmit(context) {
             scriptId: 'customscript_xcd_mv_sl',
             deploymentId: 'customdeploy_xcd_mv_sl',
             parameters: {
-                selectedPlayers: selectedPlayers
+                selectedPlayers: selectedPlayers,
+                playersCode: playersCode
+
             }
         });
-
-        log.debug('Redirect', 'Redirecting to Suitelet');
+        
     } catch (error) {
         log.error('Record Load Error', error.message);
     }

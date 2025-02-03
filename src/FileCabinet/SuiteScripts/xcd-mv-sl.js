@@ -77,12 +77,13 @@ function onRequest(context) {
             container: 'custpage_grp_current_game'
         });
 
-        var remainingCarsFld = form.addField({
-            id: 'custpage_fld_remaining_cars_name',
-            label: 'Remaining Cars',
-            type: serverWidget.FieldType.TEXTAREA,
+        var currentPlayingCarFld = form.addField({
+            id: 'custpage_fld_current_playing_car',
+            label: 'Current Playing Car',
+            type: serverWidget.FieldType.TEXT,
             container: 'custpage_grp_current_game'
         });
+
 
         var crashCashFld = form.addField({
             id: 'custpage_fld_crash_cash',
@@ -90,6 +91,14 @@ function onRequest(context) {
             type: serverWidget.FieldType.INTEGER,
             container: 'custpage_grp_current_game'
         });
+        
+        var remainingCarsFld = form.addField({
+            id: 'custpage_fld_remaining_cars_name',
+            label: 'Remaining Cars',
+            type: serverWidget.FieldType.TEXTAREA,
+            container: 'custpage_grp_current_game'
+        });
+
 
         
         // remainingCarsFld.updateLayoutType({
@@ -98,7 +107,7 @@ function onRequest(context) {
         //     height:2,
         //     width:92
         // })
-        crashCashFld.updateBreakType({
+        remainingCarsFld.updateBreakType({
             breakType : serverWidget.FieldBreakType.STARTCOL,
 
         });
@@ -132,10 +141,7 @@ function onRequest(context) {
             label: 'Remaining Cars Name',
             type: serverWidget.FieldType.TEXTAREA,
             container: 'custpage_grp_remainings'
-        }).updateDisplaySize({
-            height: 5,
-            width: 55
-        });
+        })
 
         var remainingPlayersCountFld = form.addField({
             id: 'custpage_fld_nof_remaining_players',
@@ -233,15 +239,6 @@ function onRequest(context) {
         importentNoteFld.updateLayoutType({
             layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE
         });
-
-       
-        // tornamentsPlayedFld.updateBreakType({
-        //     breakType: serverWidget.FieldBreakType.STARTCOL
-        // });
-
-        // carsOwnedFld.updateBreakType({
-        //     breakType: serverWidget.FieldBreakType.STARTROW
-        // });
 
         // B A C K E N D
         // Getting data from the Record

@@ -15,66 +15,117 @@ Changing      : 1.0.0 - Initial release
 Website       : www.cloudio.com
 */
 
-modules = ['N/currentRecord', 'N/record', 'N/query']
-define(modules, main);
+var currentRecord;
+var realCarData = {
+    'Mosses': ['Mokka Car', 'Nalla Car', 'Kola Car', 'Dappa Car', 'Mass Car'],
+    'Puni': ["Tesla Model S", "Ford Mustang", "BMW M3", "Audi R8", "Chevrolet Camaro"],
+    'Jeevan': ["Mercedes-AMG GT", "Jaguar F-Type", "Aston Martin Vantage"],
+    'Venies': ["Porsche 911", "Nissan GT-R", "Chevrolet Corvette", "Dodge Viper"],
+    'Sneha': ["Lamborghini Aventador", "Ferrari 488", "McLaren 720S", "Audi R8", "2Porsche 999"],
+    'Yohan': ['Mokka Car', 'Nalla Car', 'Kola Car', 'Dappa Car', 'Mass Car']
+};
+var carData = {
+    'Mosses': ['Mokka Car', 'Nalla Car', 'Kola Car', 'Dappa Car', 'Mass Car'],
+    'Puni': ["Tesla Model S", "Ford Mustang", "BMW M3", "Audi R8", "Chevrolet Camaro"],
+    'Jeevan': ["Mercedes-AMG GT", "Jaguar F-Type", "Aston Martin Vantage"],
+    'Venies': ["Porsche 911", "Nissan GT-R", "Chevrolet Corvette", "Dodge Viper"],
+    'Sneha': ["Lamborghini Aventador", "Ferrari 488", "McLaren 720S", "Audi R8", "2Porsche 999"],
+    'Yohan': ['Mokka Car', 'Nalla Car', 'Kola Car', 'Dappa Car', 'Mass Car']
+};
+var carsOwned = [];
+var currentPlayingCar = '';
+var playersNameArray = ['Mosses', 'Yohan', 'Puni', 'Jeevan', 'Venies', 'Sneha'];
+var playerPointer = 0;
+var playerName = playersNameArray[playerPointer];
+var crashCash = 0;
 
-// Variable Declarations
-var newremainingPlayers = []
-var currentPlayingCars = []
+define(['N/currentRecord'], main);
 
-function main(currentRecord, record) {
-    var rec = currentRecord.get();
-    var playerRec = record.load({
-        type: 'customrecord_xcd_player',
-        id: 1
-    });
-    var tourRec = record.load({
-        type: 'customrecord_xcd_tournament',
-        id: 1
-    });
-
-    currentPlayingCars = playerRec.getValue({fieldId: 'custrecord_xcd_cars_owned'})
-
+function main(currentRecordModule) {
+    currentRecord = currentRecordModule;
     return {
-        pageInit: pageInit(rec),
-        crashingCar: crashingCar
+        pageInit: pageInit,
+        // crashingCar: crashingCar,
+        platingCar: platingCar
     }
 }
 
-function pageInit(rec) {
-    var remainingPlayers = rec.getValue({fieldId: 'remainingPlayersFld'});
-    var currentPlayer = remainingPlayers[remainingPlayers.length - 1];
-    rec.setValue({
-        fieldId: 'custpage_fld_player_name',
-        value: currentPlayer
-    });
+function pageInit(context) {
+    var curRecord = context.currentRecord;
+    carsOwned = carData[playerName];
 
-    rec.setValue({
-        fieldId: 'custpage_fld_remaining_cars_name',
-        value: currentPlayingCars
-    });
+    currentPlayingCar = carsOwned.shift();
     
+    crashCash += curRecord.getValue("custpage_fld_crash_cash");
+
+    curRecord.setValue({
+        fieldId: 'custpage_fld_remaining_cars_name',
+        value: carsOwned.join(', ')
+    });
+    curRecord.setValue({
+        fieldId: 'custpage_fld_current_playing_car',
+        value: currentPlayingCar
+    });
+    curRecord.setValue({
+        fieldId: 'custpage_fld_cars_owned',
+        value: carsOwned.join(', ')
+    });
 }
-function crashingCar() {
 
-    alert("You're car is crashed. You are a fool press any key to continue.")
+
+function platingCar() {
+    try {
+        if (playersNameArray.length === playerPointer + 1) {
+            playerPointer = -1;
+            carData = deepCopy(realCarData);
+        };
+        var curRecord = currentRecord.get();
+        crashCash += 4499;
+      
+        
+        currentPlayingCar = carsOwned?.shift();
+        console.log('carsOwned:', carsOwned);
+       
+        curRecord.setValue({
+            fieldId: 'custpage_fld_crash_cash',
+            value: crashCash
+        });
+        curRecord.setValue({
+            fieldId: 'custpage_fld_remaining_cars_name',
+            value: carsOwned.join(', ')
+        });
+        curRecord.setValue({
+            fieldId: 'custpage_fld_player_name',
+            value: playerName
+        });
+
+        if (carsOwned.length === 0) {
+            playerPointer ++;
+            playerName = playersNameArray[playerPointer];
+            carsOwned = carData[playerName];
+        }
+
+        
+        curRecord.setValue({
+            fieldId: 'custpage_fld_current_playing_car',
+            value: currentPlayingCar
+        });
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
 }
 
-
-
-
-
-
-
-
-
-
-
-// Code that I might need
-// var value = rec.getValue({ fieldId: 'custpage_fld_player_name' });
-//     var curPlayerCC = rec.getValue({fieldId: 'custpage_fld_crash_cash'})
-//     var updatedValue = value + ' Ross'
-//     rec.setValue({
-//         fieldId: 'custpage_fld_player_name',
-//         value: updatedValue
-//     });
+function deepCopy(obj) {
+    if (typeof obj !== "object" || obj === null) {
+      return obj;
+    }
+  
+    const copy = Array.isArray(obj) ? [] : {}; 
+  
+    for (let key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        copy[key] = deepCopy(obj[key]);
+      }
+    }
+    return copy;
+  }
