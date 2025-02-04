@@ -5,33 +5,43 @@
  */
 
 /*
-Name          : Client Script for Button Action
+Name          : Car Crashing Game Client Script
 Author        : Mosses
-Description   : Handles button click to increment a field and submit the form.
-Dependencies  : N/currentRecord
+Description   : Manages the car crashing/plating game logic, updating player turns, scores, and car availability.
+Dependencies  : N/currentRecord, N/record, N/ui/dialog  
 Release Date  : 2025-01-09
-Version       : 1.0.0
-Changing      : 1.0.0 - Initial release
-Website       : www.cloudio.com
+Last Updated  : 2025-01-16
+Version       : 1.0.1
 */
 
 var currentRecord;
 var realCarData = {
-    'Mosses': ['Mokka Car', 'Nalla Car', 'Kola Car', 'Dappa Car', 'Mass Car'],
-    'Puni': ["Tesla Model S", "Ford Mustang", "BMW M3", "Audi R8", "Chevrolet Camaro"],
-    'Jeevan': ["Mercedes-AMG GT", "Jaguar F-Type", "Aston Martin Vantage"],
-    'Venies': ["Porsche 911", "Nissan GT-R", "Chevrolet Corvette", "Dodge Viper"],
-    'Sneha': ["Lamborghini Aventador", "Ferrari 488", "McLaren 720S", "Audi R8", "2Porsche 999"],
-    'Yohan': ['Mokka Car', 'Nalla Car', 'Kola Car', 'Dappa Car', 'Mass Car']
+    'Mosses': {
+        'car': ['Mokka Car', 'Nalla Car', 'Kola Car', 'Dappa Car', 'Mass Car'],
+        'CrashCash': 7823 // Example random number
+    },
+    'Puni': {
+        'car': ["Tesla Model S", "Ford Mustang", "BMW M3", "Audi R8", "Chevrolet Camaro"],
+        'CrashCash': 12491 // Example random number
+    },
+    'Jeevan': {
+        'car': ["Mercedes-AMG GT", "Jaguar F-Type", "Aston Martin Vantage"],
+        'CrashCash': 9547  // Example random number
+    },
+    'Venies': {
+        'car': ["Porsche 911", "Nissan GT-R", "Chevrolet Corvette", "Dodge Viper"],
+        'CrashCash': 14219 // Example random number
+    },
+    'Sneha': {
+        'car': ["Lamborghini Aventador", "Ferrari 488", "McLaren 720S", "Audi R8", "2Porsche 999"],
+        'CrashCash': 6385  // Example random number
+    },
+    'Yohan': {
+        'car': ['Mokka Car', 'Nalla Car', 'Kola Car', 'Dappa Car', 'Mass Car'],
+        'CrashCash': 11032 // Example random number
+    }
 };
-var carData = {
-    'Mosses': ['Mokka Car', 'Nalla Car', 'Kola Car', 'Dappa Car', 'Mass Car'],
-    'Puni': ["Tesla Model S", "Ford Mustang", "BMW M3", "Audi R8", "Chevrolet Camaro"],
-    'Jeevan': ["Mercedes-AMG GT", "Jaguar F-Type", "Aston Martin Vantage"],
-    'Venies': ["Porsche 911", "Nissan GT-R", "Chevrolet Corvette", "Dodge Viper"],
-    'Sneha': ["Lamborghini Aventador", "Ferrari 488", "McLaren 720S", "Audi R8", "2Porsche 999"],
-    'Yohan': ['Mokka Car', 'Nalla Car', 'Kola Car', 'Dappa Car', 'Mass Car']
-};
+var carData = deepCopy(realCarData);
 var carsOwned = [];
 var currentPlayingCar = '';
 var playersNameArray = ['Mosses', 'Yohan', 'Puni', 'Jeevan', 'Venies', 'Sneha'];
@@ -52,11 +62,11 @@ function main(currentRecordModule) {
 
 function pageInit(context) {
     var curRecord = context.currentRecord;
-    carsOwned = carData[playerName];
+    carsOwned = carData[playerName].car;
 
     currentPlayingCar = carsOwned.shift();
-    
-    crashCash += curRecord.getValue("custpage_fld_crash_cash");
+
+    crashCash = carData[playerName].CrashCash;
 
     curRecord.setValue({
         fieldId: 'custpage_fld_remaining_cars_name',
@@ -80,15 +90,14 @@ function platingCar() {
             carData = deepCopy(realCarData);
         };
         var curRecord = currentRecord.get();
-        crashCash += 4499;
-      
-        
+        realCarData[playerName].CrashCash += 4499;
+
+
         currentPlayingCar = carsOwned?.shift();
-        console.log('carsOwned:', carsOwned);
-       
+
         curRecord.setValue({
             fieldId: 'custpage_fld_crash_cash',
-            value: crashCash
+            value: realCarData[playerName].CrashCash
         });
         curRecord.setValue({
             fieldId: 'custpage_fld_remaining_cars_name',
@@ -100,12 +109,11 @@ function platingCar() {
         });
 
         if (carsOwned.length === 0) {
-            playerPointer ++;
+            playerPointer++;
             playerName = playersNameArray[playerPointer];
-            carsOwned = carData[playerName];
+            carsOwned = carData[playerName].car;
         }
 
-        
         curRecord.setValue({
             fieldId: 'custpage_fld_current_playing_car',
             value: currentPlayingCar
@@ -117,15 +125,15 @@ function platingCar() {
 
 function deepCopy(obj) {
     if (typeof obj !== "object" || obj === null) {
-      return obj;
+        return obj;
     }
-  
-    const copy = Array.isArray(obj) ? [] : {}; 
-  
+
+    const copy = Array.isArray(obj) ? [] : {};
+
     for (let key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        copy[key] = deepCopy(obj[key]);
-      }
+        if (obj.hasOwnProperty(key)) {
+            copy[key] = deepCopy(obj[key]);
+        }
     }
     return copy;
-  }
+}
