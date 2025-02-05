@@ -16,17 +16,39 @@ function main(recordModule, redirectModule) {
 
 function afterSubmit(context) {
     try {
-        const CurrentRecord = record.load({
-            type: 'customrecord_xcd_tournament',
-            id: 1
-        });
-
-        var selectedPlayers = CurrentRecord.getText({ fieldId: 'custrecord_xcd_selected_players' });
-        var playersCode = CurrentRecord.getValue({ fieldId: 'custrecord_xcd_players_code' });
-
+        var currentRecord = context.newRecord;
+        var playersDataJSON = {};
+        var playersNameArray = [];
+        var selectedPlayers = currentRecord.getText({ fieldId: 'custrecord_xcd_selected_players' });
+        var playersCode = currentRecord.getValue({ fieldId: 'custrecord_xcd_selected_players' });
+        log.debug("Players Codes", playersCode);
         if (Array.isArray(selectedPlayers)) {
             selectedPlayers = selectedPlayers.join(',');
         }
+
+        try {
+            for (var i = 0; i < playersCode.length; i++) {
+                var scopeRecord = record.load({
+                    type: 'customrecord_xcd_player',
+                    id: playersCode[i]
+                })
+                var playerName = scopeRecord.getText('name');
+                playersNameArray.push(playerName);
+                var playerId = scopeRecord.getValue('name');
+                var playerCarsString = scopeRecord.getValue('custrecord_xcd_cars_owned');
+                var playersCars = playerCarsString.split(', ');
+                var playerCrashCash = scopeRecord.getValue('custrecord_xcd_crash_cash')
+                playersDataJSON[playerName] = {
+                    id: playerId,
+                    car: playersCars,
+                    CrashCash: playerCrashCash
+                };
+                log.debug("playersDataJSON", playersDataJSON);
+            };
+        } catch (error) {
+            log.error('Error Here', error);
+        }
+
 
         log.debug('Selected Players', selectedPlayers);
 
@@ -35,11 +57,12 @@ function afterSubmit(context) {
             deploymentId: 'customdeploy_xcd_mv_sl',
             parameters: {
                 selectedPlayers: selectedPlayers,
-                playersCode: playersCode
-
+                playersCode: playersCode.join(', '),
+                playersDataJSONString: JSON.stringify(playersDataJSON),
+                playersNameArrayString: playersNameArray.join(', ')
             }
         });
-        
+
     } catch (error) {
         log.error('Record Load Error', error.message);
     }
