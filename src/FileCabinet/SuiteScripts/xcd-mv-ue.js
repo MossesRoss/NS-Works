@@ -16,6 +16,7 @@ function main(recordModule, redirectModule) {
 
 function afterSubmit(context) {
     try {
+        log.debug("Context Type", context.type);
         var currentRecord = context.newRecord;
         var playersDataJSON = {};
         var playersNameArray = [];
@@ -34,7 +35,7 @@ function afterSubmit(context) {
                 })
                 var playerName = scopeRecord.getText('name');
                 playersNameArray.push(playerName);
-                var playerId = scopeRecord.getValue('name');
+                var playerId = scopeRecord.id;
                 var playerCarsString = scopeRecord.getValue('custrecord_xcd_cars_owned');
                 var playersCars = playerCarsString.split(', ');
                 var playerCrashCash = scopeRecord.getValue('custrecord_xcd_crash_cash')
@@ -49,19 +50,25 @@ function afterSubmit(context) {
             log.error('Error Here', error);
         }
 
+        var playersDataJSONString = JSON.stringify(playersDataJSON)
+        log.debug('Players Data JSON', playersDataJSONString);
+        var typeOfThat = (typeof playersDataJSONString);
+        log.debug('Players Data JSON Type', typeOfThat);
 
-        log.debug('Selected Players', selectedPlayers);
-
-        redirect.toSuitelet({
-            scriptId: 'customscript_xcd_mv_sl',
-            deploymentId: 'customdeploy_xcd_mv_sl',
-            parameters: {
-                selectedPlayers: selectedPlayers,
-                playersCode: playersCode.join(', '),
-                playersDataJSONString: JSON.stringify(playersDataJSON),
-                playersNameArrayString: playersNameArray.join(', ')
-            }
-        });
+        try {
+            redirect.toSuitelet({
+                scriptId: 'customscript_xcd_mv_sl',
+                deploymentId: 'customdeploy_xcd_mv_sl',
+                parameters: {
+                    selectedPlayers: selectedPlayers,
+                    playersCode: playersCode.join(', '),
+                    playersDataJSONString: playersDataJSONString,
+                    playersNameArrayString: playersNameArray.join(', ')
+                }
+            });
+        } catch (error) {
+            log.error('Here', error)
+        }
 
     } catch (error) {
         log.error('Record Load Error', error.message);

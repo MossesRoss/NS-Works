@@ -30,43 +30,49 @@ function main(serverWidgetModule, recordModule, fileModule) {
 function onRequest(context) {
     if (context.request.method === 'GET') {
         var form = serverWidget.createForm({
-            title: 'CD Mark X',
+            title: 'Car Stunt Data Tracker X',
             hideNavigationBar: true
         });
 
         // B A C K E N D
         // Records Manipulation
-        try {
-            var playersNameRecord = record.load({
-                type: 'customrecord_xcd_player',
-                id: 1
-            });
-        } catch (error) {
-            log.error('Record Load Error', error.message);
-            return;
-        }
+        var playersDataJSONString = context.request.parameters.playersDataJSONString;
+        var playersNameArrayString = context.request.parameters.playersNameArrayString;
 
-        var playerName = playersNameRecord.getValue('name');
-        var playerCC = playersNameRecord.getValue('custrecord_xcd_crash_cash');
-        var playersCars = playersNameRecord.getValue('custrecord_xcd_cars_owned');
-        var tornamentsPlayed = playersNameRecord.getValue('custrecord_xcd_tours_played');
-        var tornamentsWon = playersNameRecord.getValue('custrecord_xcd_tours_won');
-        var noOfTournamentsPlayed = playersNameRecord.getValue('custrecord_xcd_number_of_tp');
-        var noOfTournamentsWon = playersNameRecord.getValue('custrecord_xcd_number_of_tw');
-        var gamesPlayed = playersNameRecord.getValue('custrecord_xcd_games_played');
+        // try {
+        //     var playersNameRecord = record.load({
+        //         type: 'customrecord_xcd_player',
+        //         id: 1
+        //     });
+        // } catch (error) {
+        //     log.error('Record Load Error', error.message);
+        //     return;
+        // }
+
+        // var playerName = playersNameRecord.getValue('name');
+        // var playerCC = playersNameRecord.getValue('custrecord_xcd_crash_cash');
+        // var playersCars = playersNameRecord.getValue('custrecord_xcd_cars_owned');
+        // var tornamentsPlayed = playersNameRecord.getValue('custrecord_xcd_tours_played');
+        // var tornamentsWon = playersNameRecord.getValue('custrecord_xcd_tours_won');
+        // var noOfTournamentsPlayed = playersNameRecord.getValue('custrecord_xcd_number_of_tp');
+        // var noOfTournamentsWon = playersNameRecord.getValue('custrecord_xcd_number_of_tw');
+        // var gamesPlayed = playersNameRecord.getValue('custrecord_xcd_games_played');
 
         //  U I   E L E M E N T S
         // BUTTONS
         form.addButton({ id: 'custpage_btn_crash', label: 'Crash', functionName: 'crashingCar()' });
         form.addButton({ id: 'custpage_btn_plate', label: 'Plate', functionName: 'platingCar()' });
         form.addButton({ id: 'custpage_btn_drift', label: 'Drift', functionName: 'driftingCar()' });
+        form.addButton({ id: 'custpage_btn_just_riding', label: 'Just Riding', functionName: 'justRiding()' });
+        form.addButton({ id: 'custpage_btn_plate_rounding', label: 'Plate Round', functionName: 'plateRounding()' });
+        form.addButton({ id: 'custpage_btn_load_next_player', label: 'Load Next Player', functionName: 'loadNextPlayer()' });
 
         // FIELD GROUPS
         form.addFieldGroup({ id: 'custpage_grp_current_game', label: "Current Game" });
         form.addFieldGroup({ id: 'custpage_grp_current_player_info', label: "Player Info" });
         form.addFieldGroup({ id: 'custpage_grp_remainings', label: "Remainings" });
         form.addFieldGroup({ id: 'custpage_grp_others', label: "Others" });
-      
+
         // FIELDS
         // Current Game
 
@@ -91,7 +97,7 @@ function onRequest(context) {
             type: serverWidget.FieldType.INTEGER,
             container: 'custpage_grp_current_game'
         });
-        
+
         var remainingCarsFld = form.addField({
             id: 'custpage_fld_remaining_cars_name',
             label: 'Remaining Cars',
@@ -100,7 +106,7 @@ function onRequest(context) {
         });
 
 
-        
+
         // remainingCarsFld.updateLayoutType({
         //     layoutType: serverWidget.FieldLayoutType.OUTSIDEBELOW});
         // remainingCarsFld.updateDisplaySize({
@@ -108,7 +114,7 @@ function onRequest(context) {
         //     width:92
         // })
         remainingCarsFld.updateBreakType({
-            breakType : serverWidget.FieldBreakType.STARTCOL,
+            breakType: serverWidget.FieldBreakType.STARTCOL,
 
         });
 
@@ -161,12 +167,10 @@ function onRequest(context) {
         });
 
         remainingPlayersFld.updateBreakType({
-            breakType : serverWidget.FieldBreakType.STARTCOL,
+            breakType: serverWidget.FieldBreakType.STARTCOL,
 
         });
 
-       
-       
 
         var importentNoteFld = form.addField({
             id: 'custpage_fld_importent_note',
@@ -186,40 +190,23 @@ function onRequest(context) {
             type: serverWidget.FieldType.INTEGER,
             container: 'custpage_grp_others'
         });
-      
 
-        inlineHtml.defaultValue = '<html>' +
-            '<head>' +
-            '<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>' +
-            '</head>' +
-            '<body>' +
-            '<h1>Crash Cash Leaderboard</h1>' +
-            '<canvas id="crashCashChart" width="400" height="400"></canvas>' +
-            '<script>' +
-            'document.addEventListener("DOMContentLoaded", function() {' +
-            'var ctx = document.getElementById("crashCashChart").getContext("2d");' +
-            'new Chart(ctx, {' +
-            'type: "bar",' +
-            'data: {' +
-            'labels: ["Player 1", "Player 2", "Player 3"],' +
-            'datasets: [{' +
-            'label: "Crash Cash",' +
-            'data: [5000, 3000, 7000],' +
-            'backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"]' +
-            '}]' +
-            '},' +
-            'options: {' +
-            'scales: {' +
-            'y: { beginAtZero: true }' +
-            '}' +
-            '}' +
-            '});' +
-            '});' +
-            '</script>' +
-            '</body>' +
-            '</html>';
+        var playersNameArrayStringFld = form.addField({
+            id: 'custpage_fld_players_array',
+            label: 'Players Array',
+            type: serverWidget.FieldType.TEXTAREA
+        }).updateDisplayType({
+            displayType: serverWidget.FieldDisplayType.HIDDEN
+        });
 
-        log.debug('inline HTML', inlineHtml.defaultValue);
+        var playersDataJSONStringFld = form.addField({
+            id: 'custpage_fld_player_data_json',
+            label: 'Player Data JSON String',
+            type: serverWidget.FieldType.TEXTAREA
+        }).updateDisplayType({
+            displayType: serverWidget.FieldDisplayType.HIDDEN
+        });
+
 
         // DISPLAY TYPES
         function setFieldsDisplayType(fields, displayType) {
@@ -228,26 +215,29 @@ function onRequest(context) {
             });
         }
 
-        // var disablableFields = [
-        //     gameCountFld, playerNameFld, /*crashCashFld*/ remainingCarsFld,
-        //     totalGamesPlayedFld, tornamentsPlayedFld, remainingPlayersCountFld,
-        //     remainingPlayersFld, totalRemainingCarsFld
-        // ];
+        var disablableFields = [playerNameFld, crashCashFld, remainingCarsFld, currentPlayingCarFld];
 
-        // setFieldsDisplayType(disablableFields, serverWidget.FieldDisplayType.INLINE);
+        var hideableFields = [gameCountFld, remainingPlayersFld, totalRemainingCarsFld,
+            totalGamesPlayedFld, carsOwnedFld, tornamentsPlayedFld, remainingPlayersCountFld]
+
+        setFieldsDisplayType(disablableFields, serverWidget.FieldDisplayType.INLINE);
+        setFieldsDisplayType(hideableFields, serverWidget.FieldDisplayType.HIDDEN)
 
         importentNoteFld.updateLayoutType({
             layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE
         });
 
         // B A C K E N D
-        // Getting data from the Record
-        totalRemainingCarsFld.defaultValue = playersCars;
-        remainingPlayersFld.defaultValue = playerName;
-        playerNameFld.defaultValue = playerName;
-        crashCashFld.defaultValue = playerCC;
-        totalGamesPlayedFld.defaultValue = gamesPlayed;
-        tornamentsPlayedFld.defaultValue = noOfTournamentsPlayed;
+        // Setting The default Values
+
+        // totalRemainingCarsFld.defaultValue = playersCars;
+        // remainingPlayersFld.defaultValue = playerName;
+        // playerNameFld.defaultValue = playerName;
+        // crashCashFld.defaultValue = playerCC;
+        // totalGamesPlayedFld.defaultValue = gamesPlayed;
+
+        playersDataJSONStringFld.defaultValue = playersDataJSONString;
+        playersNameArrayStringFld.defaultValue = playersNameArrayString;
 
         remainingPlayersFld.defaultValue = context.request.parameters.selectedPlayers;
 
@@ -255,25 +245,37 @@ function onRequest(context) {
         form.addSubmitButton();
         context.response.writePage(form);
 
-    } else if (context.request.method === 'POST') {
+    }
+
+    //  P O S T   (Post)
+
+    else if (context.request.method === 'POST') {
         var form = serverWidget.createForm({
             title: 'Game Saved Successfully'
         });
 
-        //  B A C K E N D
-        // Loading Record
-        var playersNameRecord = record.load({
-            type: 'customrecord_xcd_player',
-            id: 1
-        });
+        var playerId = context.request.parameters.playerId;
+        var crashCash = context.request.parameters.crashCash;
 
-        // Updating Record (From Field Values to record)
-        playersNameRecord.setValue({
-            fieldId: 'custrecord_xcd_crash_cash',
-            value: context.request.parameters.custpage_fld_crash_cash
-        });
+        if (playerId) {
+            log.debug('playerId', playerId);
+            log.debug('crashCash', crashCash);
 
-        playersNameRecord.save();
+            //  B A C K E N D
+            // Loading Record
+            var playersNameRecord = record.load({
+                type: 'customrecord_xcd_player',
+                id: playerId
+            });
+
+            // Updating Record (From Field Values to record)
+            playersNameRecord.setValue({
+                fieldId: 'custrecord_xcd_crash_cash',
+                value: crashCash
+            });
+
+            playersNameRecord.save();
+        }
 
         form.addField({
             id: 'custpage_success_message',

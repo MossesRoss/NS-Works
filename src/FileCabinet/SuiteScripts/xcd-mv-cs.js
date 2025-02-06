@@ -14,60 +14,65 @@ Last Updated  : 2025-01-16
 Version       : 1.0.1
 */
 
-var currentRecord;
-var realCarData = {
-    'Mosses': {
-        'car': ['Mokka Car', 'Nalla Car', 'Kola Car', 'Dappa Car', 'Mass Car'],
-        'CrashCash': 7823 // Example random number
-    },
-    'Puni': {
-        'car': ["Tesla Model S", "Ford Mustang", "BMW M3", "Audi R8", "Chevrolet Camaro"],
-        'CrashCash': 12491 // Example random number
-    },
-    'Jeevan': {
-        'car': ["Mercedes-AMG GT", "Jaguar F-Type", "Aston Martin Vantage"],
-        'CrashCash': 9547  // Example random number
-    },
-    'Venies': {
-        'car': ["Porsche 911", "Nissan GT-R", "Chevrolet Corvette", "Dodge Viper"],
-        'CrashCash': 14219 // Example random number
-    },
-    'Sneha': {
-        'car': ["Lamborghini Aventador", "Ferrari 488", "McLaren 720S", "Audi R8", "2Porsche 999"],
-        'CrashCash': 6385  // Example random number
-    },
-    'Yohan': {
-        'car': ['Mokka Car', 'Nalla Car', 'Kola Car', 'Dappa Car', 'Mass Car'],
-        'CrashCash': 11032 // Example random number
-    }
-};
-var carData = deepCopy(realCarData);
+var currentRecord, url, https, dialog;
+var realCarData = {};
+var carData = {};
 var carsOwned = [];
 var currentPlayingCar = '';
-var playersNameArray = ['Mosses', 'Yohan', 'Puni', 'Jeevan', 'Venies', 'Sneha'];
+var playersNameArray = [];
 var playerPointer = 0;
 var playerName = playersNameArray[playerPointer];
 var crashCash = 0;
+var lastCar = false;
 
-define(['N/currentRecord'], main);
+define(['N/currentRecord', 'N/url', 'N/https', 'N/ui/dialog'], main);
 
-function main(currentRecordModule) {
+function main(currentRecordModule, urlModule, httpsModule, dialogModule) {
     currentRecord = currentRecordModule;
+    url = urlModule;
+    https = httpsModule;
+    dialog = dialogModule;
     return {
         pageInit: pageInit,
-        // crashingCar: crashingCar,
-        platingCar: platingCar
+        crashingCar: crashingCar,
+        platingCar: platingCar,
+        driftingCar: driftingCar,
+        justRiding: justRiding,
+        plateRounding: plateRounding,
+        loadNextPlayer: loadNextPlayer
     }
 }
 
 function pageInit(context) {
     var curRecord = context.currentRecord;
+
+    var playersDataJSONString = curRecord.getValue('custpage_fld_player_data_json');
+    if (!playersDataJSONString) {
+        dialog.alert({
+            title: 'Access Denied',
+            message: 'You are not allowed to open this Suitelet directly. Please contact Mosses for guidance on using this application.'
+        }).then(function (result) {
+            window.location.href = 'https://tstdrv1887008.app.netsuite.com/app/center/card.nl?sc=-29&whence=';
+        });
+        return; 1
+    }
+    var playersNameArrayString = curRecord.getValue('custpage_fld_players_array');
+    playersDataJSON = JSON.parse(playersDataJSONString);
+    playersNameArray = playersNameArrayString.split(', ');
+    realCarData = playersDataJSON;
+    carData = deepCopy(realCarData);
+    playerName = playersNameArray[playerPointer];
+
+    console.log(playersDataJSONString);
+
     carsOwned = carData[playerName].car;
-
     currentPlayingCar = carsOwned.shift();
-
     crashCash = carData[playerName].CrashCash;
 
+    curRecord.setValue({
+        fieldId: 'custpage_fld_player_name',
+        value: playerName
+    })
     curRecord.setValue({
         fieldId: 'custpage_fld_remaining_cars_name',
         value: carsOwned.join(', ')
@@ -82,18 +87,21 @@ function pageInit(context) {
     });
 }
 
-
 function platingCar() {
-    try {
-        if (playersNameArray.length === playerPointer + 1) {
-            playerPointer = -1;
-            carData = deepCopy(realCarData);
-        };
-        var curRecord = currentRecord.get();
-        realCarData[playerName].CrashCash += 4499;
+    realCarData[playerName].CrashCash += 4499;
+    crashingCar();
+}
 
-
-        currentPlayingCar = carsOwned?.shift();
+function crashingCar() {
+    var curRecord = currentRecord.get();
+    if (lastCar === true || currentPlayingCar === null) {
+        playerCarsFinished(curRecord);
+    } else {
+        currentPlayingCar = carsOwned[0];
+        if (carsOwned.length === 0) {
+            lastCar = true;
+        }
+        carsOwned?.shift();
 
         curRecord.setValue({
             fieldId: 'custpage_fld_crash_cash',
@@ -104,23 +112,47 @@ function platingCar() {
             value: carsOwned.join(', ')
         });
         curRecord.setValue({
-            fieldId: 'custpage_fld_player_name',
-            value: playerName
-        });
-
-        if (carsOwned.length === 0) {
-            playerPointer++;
-            playerName = playersNameArray[playerPointer];
-            carsOwned = carData[playerName].car;
-        }
-
-        curRecord.setValue({
             fieldId: 'custpage_fld_current_playing_car',
             value: currentPlayingCar
         });
-    } catch (error) {
-        console.error('Error:', error.message);
     }
+}
+
+function justRiding() {
+    var curRecord = currentRecord.get();
+
+    if (lastCar === true || currentPlayingCar === null) {
+        playerCarsFinished(curRecord);
+    }
+    realCarData[playerName].CrashCash -= 51;
+    curRecord.setValue({
+        fieldId: 'custpage_fld_crash_cash',
+        value: realCarData[playerName].CrashCash
+    });
+};
+
+function driftingCar() {
+    var curRecord = currentRecord.get();
+    if (lastCar === true || currentPlayingCar === null) {
+        playerCarsFinished(curRecord);
+    }
+    realCarData[playerName].CrashCash += 2551;
+    curRecord.setValue({
+        fieldId: 'custpage_fld_crash_cash',
+        value: realCarData[playerName].CrashCash
+    });
+}
+
+function plateRounding() {
+    var curRecord = currentRecord.get();
+    if (lastCar === true || currentPlayingCar === null) {
+        playerCarsFinished();
+    }
+    realCarData[playerName].CrashCash += 20551;
+    curRecord.setValue({
+        fieldId: 'custpage_fld_crash_cash',
+        value: realCarData[playerName].CrashCash
+    });
 }
 
 function deepCopy(obj) {
@@ -136,4 +168,69 @@ function deepCopy(obj) {
         }
     }
     return copy;
+}
+
+function saveToRecord() {
+    var suiteletURL = url.resolveScript({
+        scriptId: 'customscript_xcd_mv_sl',
+        deploymentId: 'customdeploy_xcd_mv_sl'
+    });
+    jQuery.ajax({
+        url: suiteletURL,
+        type: 'POST',
+        data: {
+            crashCash: realCarData[playerName].CrashCash,
+            playerId: realCarData[playerName].id
+        },
+        success: function (response) {
+            console.log('CrashCash updated successfully:', response);
+        },
+        error: function (error) {
+            console.error('Error updating CrashCash:', error);
+        }
+    });
+}
+
+function playerCarsFinished(curRecord) {
+    dialog.alert({ title: "Cars Finished", message: "Player's cars are finished, Load the next Player" });
+    currentPlayingCar = null;
+
+    curRecord.setValue({
+        fieldId: 'custpage_fld_current_playing_car',
+        value: currentPlayingCar
+    });
+
+    lastCar = false;
+    return;
+}
+
+function loadNextPlayer() {
+    saveToRecord();
+    var curRecord = currentRecord.get();
+    if (playersNameArray.length === playerPointer + 1) {
+        playerPointer = -1;
+        carData = deepCopy(realCarData);
+    };
+    playerPointer++;
+    playerName = playersNameArray[playerPointer];
+    carsOwned = carData[playerName].car;
+    currentPlayingCar = carsOwned.shift();
+    crashCash = carData[playerName].CrashCash;
+
+    curRecord.setValue({
+        fieldId: 'custpage_fld_player_name',
+        value: playerName
+    });
+    curRecord.setValue({
+        fieldId: 'custpage_fld_remaining_cars_name',
+        value: carsOwned.join(', ')
+    });
+    curRecord.setValue({
+        fieldId: 'custpage_fld_current_playing_car',
+        value: currentPlayingCar
+    });
+    curRecord.setValue({
+        fieldId: 'custpage_fld_crash_cash',
+        value: crashCash
+    });
 }
