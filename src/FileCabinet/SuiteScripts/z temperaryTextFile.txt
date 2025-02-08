@@ -1,48 +1,10 @@
-function crashingCar() {
-    try {
-        var curRecord = currentRecord.get();
-        var currentPlayingCar = carsOwned.shift();
-        var crashCCReward = crashCash += 400;
-        if (playersNameArray.length === 0) {
-            playersNameArray = playersNameArray.concat(tempCurrentPlayersNameArray);
-        };
-        if (carsOwned.length === 0) {
-            playerName = playersNameArray.shift();
-            tempCurrentPlayersNameArray.push(playerName);
-            carsOwned = carData[playerName];
-        }
+Fixes In xcd (in priority order)
 
-        curRecord.setValue({
-            fieldId: 'custpage_fld_crash_cash',
-            value: crashCCReward
-        });
-        curRecord.setValue({
-            fieldId: 'custpage_fld_remaining_cars_name',
-            value: carsOwned.join(', ')
-        });
-        curRecord.setValue({
-            fieldId: 'custpage_fld_player_name',
-            value: playerName
-        });
+1. Car buying mechanism
+2. Correct CC.
+2.1. First Crashing Mechanism.
+3. Plate Rounding More Customisation (like choosing how much to add).
+4. Explicit add money and remove money button.
 
-        if (carsOwned.length === 0) {
-            alert('Next Player is loaded, since the last car is crashed');
-            var tempPlayerName = playersNameArray.shift();
-            tempCurrentPlayersNameArray.push(tempPlayerName);
-            carsOwned = carsOwned.concat(crashedCars);
-            crashedCars = [];
-            return;
-        }
-
-        curRecord.setValue({
-            fieldId: 'custpage_fld_current_playing_car',
-            value: currentPlayingCar
-        });
-        // playerRecord.setValue({
-        //     fieldId: 'custrecord_xcd_crash_cash',
-        //     value: crashCCReward
-        // })
-    } catch (error) {
-        console.error('Error:', error.message);
-    }
-}
+Optional
+5. If possible group all the Basic buttons together.
