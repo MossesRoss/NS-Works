@@ -68,8 +68,7 @@ function pageInit(context) {
     carsOwned = carData[playerName].car;
     currentPlayingCar = carsOwned.shift();
     crashCash = carData[playerName].CrashCash;
-    playerProfilePhotoUrl = carData[playerName.playerProfilePhotoUrl];
-
+    playerProfilePhotoUrl = carData[playerName.profilePhotoUrl];
 
     curRecord.setValue({
         fieldId: 'custpage_fld_player_name',
