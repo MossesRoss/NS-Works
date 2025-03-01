@@ -43,7 +43,7 @@ function main(currentRecordModule, urlModule, httpsModule, dialogModule) {
         loadNextPlayer: loadNextPlayer,
         addCustomCC: addCustomCC,
         saveRecord: saveRecord,
-        removeCustomCC, removeCustomCC
+        removeCustomCC: removeCustomCC
     }
 }
 
